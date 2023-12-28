@@ -2,8 +2,6 @@ import 'dart:typed_data';
 
 import 'package:ai_image_analysis/firebase/firebase_database.dart';
 import 'package:ai_image_analysis/pages/camera_page.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -40,32 +38,7 @@ class _HomePageState extends State<HomePage> {
       body: (_isReady)
           ? Padding(
               padding: EdgeInsets.all(12),
-              child: FirebaseAnimatedList(
-                query: Database().getInstance('images'),
-                itemBuilder: (
-                  BuildContext context,
-                  DataSnapshot snapshot,
-                  Animation<double> animation,
-                  int index,
-                ) {
-                  dynamic value = snapshot.value;
-                  return ListTile(
-                    tileColor: Theme.of(context).secondaryHeaderColor,
-                    contentPadding: EdgeInsets.fromLTRB(8, 12, 8, 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    leading: Image.memory(
-                      Uint8List.fromList(
-                        value['content'].toString().codeUnits,
-                      ),
-                    ),
-                    title: Text(value['title']),
-                  );
-                },
-              ),
-              /*
-              ListView.builder(
+              child: ListView.builder(
                 itemCount: _images.length,
                 itemBuilder: (context, index) {
                   return ListTile(
@@ -83,7 +56,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              */
             )
           : Container(
               color: Colors.black,

@@ -42,8 +42,8 @@ class _PreviewPageState extends State<PreviewPage> {
   Future<void> addPicture() async {
     Uint8List pictureData = await widget.picture.readAsBytes();
     String pictureContent = String.fromCharCodes(pictureData);
-    await _database.create('images/2', {
-      'title': 'Image 02',
+    await _database.push('images', {
+      'title': 'image',
       'content': pictureContent,
     });
 
