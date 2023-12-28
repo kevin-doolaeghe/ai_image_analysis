@@ -8,7 +8,8 @@ Kevin DOOLAEGHE
 
 * [Firebase console](https://console.firebase.google.com/u/0/?pli=1)
 * [Firebase CLI](https://firebase.google.com/docs/cli#setup_update_cli)
-* [Google Codelab - Add Firebase to your Flutter application](https://firebase.google.com/docs/flutter/setup?platform=ios)
+* [Google Codelab - Get to know Firebase for Flutter](https://firebase.google.com/codelabs/firebase-get-to-know-flutter#0)
+* [Google Docs - Add Firebase to your Flutter application](https://firebase.google.com/docs/flutter/setup?platform=ios)
 
 ## Setup a new Flutter project
 
