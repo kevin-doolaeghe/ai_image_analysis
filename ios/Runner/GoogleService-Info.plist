@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBy5VvPvjiWUI93A91_WMzM_a-O0H3V47E</string>
+	<key>GCM_SENDER_ID</key>
+	<string>817211044597</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.aiImageAnalysis</string>
+	<key>PROJECT_ID</key>
+	<string>ai-image-analysis</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ai-image-analysis.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:817211044597:ios:495f499d588bd6752ccbbc</string>
+	<key>DATABASE_URL</key>
+	<string>https://ai-image-analysis-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>

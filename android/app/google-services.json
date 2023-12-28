@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "817211044597",
+    "firebase_url": "https://ai-image-analysis-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "ai-image-analysis",
+    "storage_bucket": "ai-image-analysis.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817211044597:android:5f6cd0461f6369d72ccbbc",
+        "android_client_info": {
+          "package_name": "com.example.ai_image_analysis"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf3zk8g8Djuxe2M9R946Gpmf3HIJ62QNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
