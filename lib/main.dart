@@ -1,6 +1,7 @@
+import 'package:ai_image_analysis/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'firebase/firebase_options.dart';
 
 void main() async {
   await Firebase.initializeApp(
@@ -28,7 +29,7 @@ class App extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       title: 'AI Image Analysis App',
-      home: const SafeArea(child: Placeholder()),
+      home: const SafeArea(child: HomePage()),
     );
   }
 }
