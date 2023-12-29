@@ -65,13 +65,13 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             iconSize: 30,
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            icon: const Icon(Icons.image, color: Colors.white),
+            icon: const Icon(Icons.add_photo_alternate, color: Colors.white),
             onPressed: _uploadPicture,
           ),
           IconButton(
             iconSize: 30,
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            icon: const Icon(Icons.photo_camera, color: Colors.white),
+            icon: const Icon(Icons.add_a_photo, color: Colors.white),
             onPressed: _takePicture,
           ),
         ],

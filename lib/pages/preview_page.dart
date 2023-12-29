@@ -29,19 +29,30 @@ class _PreviewPageState extends State<PreviewPage> {
       body: Center(
         child: Image.network(widget.picture.path, fit: BoxFit.cover),
       ),
-      floatingActionButton: (widget.id.isEmpty)
-          ? IconButton(
-              iconSize: 30,
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-              icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: _addPicture,
-            )
-          : IconButton(
-              iconSize: 30,
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: _deletePicture,
-            ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          IconButton(
+            iconSize: 30,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+            icon: const Icon(Icons.upload_file, color: Colors.white),
+            onPressed: _analyzePicture,
+          ),
+          (widget.id.isEmpty)
+              ? IconButton(
+                  iconSize: 30,
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  icon: const Icon(Icons.send, color: Colors.white),
+                  onPressed: _addPicture,
+                )
+              : IconButton(
+                  iconSize: 30,
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  icon: const Icon(Icons.delete, color: Colors.white),
+                  onPressed: _deletePicture,
+                ),
+        ],
+      ),
     );
   }
 
@@ -78,4 +89,6 @@ class _PreviewPageState extends State<PreviewPage> {
       ),
     );
   }
+
+  Future<void> _analyzePicture() async {}
 }
