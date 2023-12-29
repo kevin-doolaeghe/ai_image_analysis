@@ -20,12 +20,12 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
+        colorSchemeSeed: Colors.lightBlue,
         useMaterial3: true,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: Colors.blue,
+        colorSchemeSeed: Colors.lightBlue,
         useMaterial3: true,
         brightness: Brightness.dark,
       ),

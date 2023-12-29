@@ -29,13 +29,17 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _initCameras() async {
-    _cameras = await availableCameras();
-    await _setupCamera(_cameras[0]);
+    try {
+      _cameras = await availableCameras();
+      await _setupCamera(_cameras[0]);
+    } on Exception catch (e) {
+      debugPrint('Camera error: $e');
+    }
   }
 
   Future<void> _setupCamera(CameraDescription camera) async {
     try {
-      _controller = CameraController(camera, ResolutionPreset.medium);
+      _controller = CameraController(camera, ResolutionPreset.max);
       await _controller.initialize().then((_) {
         if (!mounted) return;
         setState(() {
@@ -94,9 +98,7 @@ class _CameraPageState extends State<CameraPage> {
                       setState(() {
                         _isRearCameraSelected = !_isRearCameraSelected;
                       });
-                      _setupCamera(
-                        _cameras[_isRearCameraSelected ? 0 : 1],
-                      );
+                      _setupCamera(_cameras[_isRearCameraSelected ? 0 : 1]);
                     },
                   ),
                 ),
@@ -104,10 +106,10 @@ class _CameraPageState extends State<CameraPage> {
               Expanded(
                 child: Center(
                   child: IconButton(
-                    onPressed: takePicture,
                     iconSize: 50,
                     padding: const EdgeInsets.all(12),
                     icon: const Icon(Icons.circle, color: Colors.white),
+                    onPressed: _takePicture,
                   ),
                 ),
               ),
@@ -119,9 +121,9 @@ class _CameraPageState extends State<CameraPage> {
     ]);
   }
 
-  Future takePicture() async {
-    if (!_controller.value.isInitialized) return null;
-    if (_controller.value.isTakingPicture) return null;
+  Future<void> _takePicture() async {
+    if (!_isReady || !_controller.value.isInitialized) return;
+    if (_controller.value.isTakingPicture) return;
     try {
       try {
         await _controller.setFlashMode(FlashMode.off);
@@ -136,12 +138,14 @@ class _CameraPageState extends State<CameraPage> {
         MaterialPageRoute(
           builder: (context) => PreviewPage(
             picture: picture,
+            timestamp: DateTime.now(),
+            id: '',
           ),
         ),
       );
     } on CameraException catch (e) {
       debugPrint('Error occured while taking picture: $e');
-      return null;
+      return;
     }
   }
 }

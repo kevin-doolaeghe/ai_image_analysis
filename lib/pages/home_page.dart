@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:ai_image_analysis/firebase/firebase_database.dart';
 import 'package:ai_image_analysis/pages/camera_page.dart';
+import 'package:ai_image_analysis/pages/preview_page.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,93 +15,97 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Database _database;
-  late dynamic _images;
-  bool _isReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _database = Database();
-    fetchImages();
-  }
-
-  Future<void> fetchImages() async {
-    _images = await _database.read('images');
-    debugPrint('HomePage.fetchImages: $_images');
-    if (!mounted) return;
-    setState(() {
-      _isReady = true;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: (_isReady)
-          ? Padding(
-              padding: EdgeInsets.all(12),
-              child: FirebaseAnimatedList(
-                query: Database().getInstance('images'),
-                itemBuilder: (
-                  BuildContext context,
-                  DataSnapshot snapshot,
-                  Animation<double> animation,
-                  int index,
-                ) {
-                  dynamic value = snapshot.value;
-                  return ListTile(
-                    tileColor: Theme.of(context).secondaryHeaderColor,
-                    contentPadding: EdgeInsets.fromLTRB(8, 12, 8, 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    leading: Image.memory(
-                      Uint8List.fromList(
-                        value['content'].toString().codeUnits,
-                      ),
-                    ),
-                    title: Text(value['title']),
-                  );
-                },
+      body: FirebaseAnimatedList(
+        query: FirebaseDatabase.instance.ref('images'),
+        itemBuilder: (
+          BuildContext context,
+          DataSnapshot snapshot,
+          Animation<double> animation,
+          int index,
+        ) {
+          dynamic data = snapshot.value;
+          Uint8List imageData = Uint8List.fromList(
+            data['content'].toString().codeUnits,
+          );
+          DateTime dt = DateTime.fromMillisecondsSinceEpoch(data['timestamp']);
+          String timestamp = dt.toLocal().toIso8601String();
+
+          return Padding(
+            padding: EdgeInsets.all(12),
+            child: ListTile(
+              tileColor: Theme.of(context).dialogBackgroundColor,
+              contentPadding: EdgeInsets.fromLTRB(8, 12, 8, 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
               ),
-              /*
-              ListView.builder(
-                itemCount: _images.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    tileColor: Theme.of(context).secondaryHeaderColor,
-                    contentPadding: EdgeInsets.fromLTRB(8, 12, 8, 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+              leading: Image.memory(imageData),
+              title: Text(timestamp),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PreviewPage(
+                      picture: XFile.fromData(imageData),
+                      timestamp: dt,
+                      id: snapshot.key ?? '',
                     ),
-                    leading: Image.memory(
-                      Uint8List.fromList(
-                        _images['2']['content'].toString().codeUnits,
-                      ),
-                    ),
-                    title: Text(_images['2']['title']),
-                  );
-                },
-              ),
-              */
-            )
-          : Container(
-              color: Colors.black,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+                  ),
+                );
+              },
             ),
-      floatingActionButton: IconButton(
-        iconSize: 30,
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        icon: const Icon(Icons.add, color: Colors.white),
-        onPressed: takePicture,
+          );
+        },
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          IconButton(
+            iconSize: 30,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+            icon: const Icon(Icons.image, color: Colors.white),
+            onPressed: _uploadPicture,
+          ),
+          IconButton(
+            iconSize: 30,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+            icon: const Icon(Icons.photo_camera, color: Colors.white),
+            onPressed: _takePicture,
+          ),
+        ],
       ),
     );
   }
 
-  void takePicture() {
+  Future<void> _uploadPicture() async {
+    try {
+      final imagePicker = ImagePicker();
+      final selectedImage = await imagePicker.pickImage(
+        source: ImageSource.gallery,
+      );
+      if (selectedImage == null) return;
+
+      DateTime timestamp = await selectedImage.lastModified();
+
+      if (!context.mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PreviewPage(
+            id: '',
+            picture: selectedImage,
+            timestamp: timestamp,
+          ),
+        ),
+      );
+    } on Exception catch (e) {
+      debugPrint('Image picker error: $e');
+    }
+  }
+
+  void _takePicture() {
     Navigator.push(
       context,
       MaterialPageRoute(
