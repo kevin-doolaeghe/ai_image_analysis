@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -45,16 +48,6 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCvl6BkrynC7duVF276w6eeLIDzg_S7aO0',
-    appId: '1:817211044597:web:01b399d234adf0962ccbbc',
-    messagingSenderId: '817211044597',
-    projectId: 'ai-image-analysis',
-    authDomain: 'ai-image-analysis.firebaseapp.com',
-    databaseURL: 'https://ai-image-analysis-default-rtdb.europe-west1.firebasedatabase.app',
-    storageBucket: 'ai-image-analysis.appspot.com',
-  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBf3zk8g8Djuxe2M9R946Gpmf3HIJ62QNA',

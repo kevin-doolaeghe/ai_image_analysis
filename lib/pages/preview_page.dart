@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:ai_image_analysis/pages/home_page.dart';
-// import 'package:ai_image_analysis/tflite/object_detection.dart';
+import 'package:ai_image_analysis/tflite/tflite.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -123,9 +123,7 @@ class _PreviewPageState extends State<PreviewPage> {
   }
 
   Future<void> _analyzePicture() async {
-    /*
-    final objectDetection = ObjectDetection();
-    final imageData = await objectDetection.processImage(widget.picture);
+    final imageData = await TFLite().detectObjects(widget.picture);
 
     if (!context.mounted) return;
     Navigator.push(
@@ -138,6 +136,5 @@ class _PreviewPageState extends State<PreviewPage> {
         ),
       ),
     );
-    */
   }
 }
