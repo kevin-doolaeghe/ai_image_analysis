@@ -69,9 +69,9 @@ class _CameraPageState extends State<CameraPage> {
         ),
       ),
       Positioned(
-        bottom: 0,
         left: 0,
         right: 0,
+        bottom: 0,
         child: Container(
           height: MediaQuery.of(context).size.height * 0.18,
           decoration: BoxDecoration(
@@ -137,9 +137,9 @@ class _CameraPageState extends State<CameraPage> {
         context,
         MaterialPageRoute(
           builder: (context) => PreviewPage(
+            id: '',
             picture: picture,
             timestamp: DateTime.now(),
-            id: '',
           ),
         ),
       );

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:ai_image_analysis/pages/home_page.dart';
+// import 'package:ai_image_analysis/tflite/object_detection.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -22,46 +23,77 @@ class PreviewPage extends StatefulWidget {
 }
 
 class _PreviewPageState extends State<PreviewPage> {
+  late Uint8List _pictureData;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initImageData();
+  }
+
+  Future<void> _initImageData() async {
+    _pictureData = await widget.picture.readAsBytes();
+    setState(() {
+      _isReady = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Preview')),
-      body: Center(
-        child: Image.network(widget.picture.path, fit: BoxFit.cover),
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      body: Column(
         children: [
-          IconButton(
-            iconSize: 30,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            icon: const Icon(Icons.upload_file, color: Colors.white),
-            onPressed: _analyzePicture,
+          Expanded(
+            child: Center(
+              child: (_isReady)
+                  ? Image.memory(
+                      _pictureData,
+                      fit: BoxFit.scaleDown,
+                    )
+                  : CircularProgressIndicator(),
+            ),
           ),
-          (widget.id.isEmpty)
-              ? IconButton(
-                  iconSize: 30,
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                  icon: const Icon(Icons.send, color: Colors.white),
-                  onPressed: _addPicture,
-                )
-              : IconButton(
-                  iconSize: 30,
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                  icon: const Icon(Icons.delete, color: Colors.white),
-                  onPressed: _deletePicture,
-                ),
+          Padding(
+            padding: EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: (widget.id.isEmpty)
+                  ? [
+                      IconButton(
+                        iconSize: 30,
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                        icon: const Icon(Icons.send),
+                        onPressed: _addPicture,
+                      )
+                    ]
+                  : [
+                      IconButton(
+                        iconSize: 30,
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                        icon: const Icon(Icons.upload_file),
+                        onPressed: _analyzePicture,
+                      ),
+                      IconButton(
+                        iconSize: 30,
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                        icon: const Icon(Icons.delete),
+                        onPressed: _deletePicture,
+                      ),
+                    ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _addPicture() async {
-    Uint8List pictureData = await widget.picture.readAsBytes();
-    String pictureContent = String.fromCharCodes(pictureData);
+    String pictureContent = String.fromCharCodes(_pictureData);
 
     final ref = FirebaseDatabase.instance.ref('images');
-    ref.push().set({
+    await ref.push().set({
       'timestamp': widget.timestamp.millisecondsSinceEpoch,
       'content': pictureContent,
     });
@@ -90,5 +122,22 @@ class _PreviewPageState extends State<PreviewPage> {
     );
   }
 
-  Future<void> _analyzePicture() async {}
+  Future<void> _analyzePicture() async {
+    /*
+    final objectDetection = ObjectDetection();
+    final imageData = await objectDetection.processImage(widget.picture);
+
+    if (!context.mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PreviewPage(
+          id: '',
+          picture: XFile.fromData(imageData),
+          timestamp: DateTime.now(),
+        ),
+      ),
+    );
+    */
+  }
 }

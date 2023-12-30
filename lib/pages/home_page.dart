@@ -27,11 +27,12 @@ class _HomePageState extends State<HomePage> {
           int index,
         ) {
           dynamic data = snapshot.value;
-          Uint8List imageData = Uint8List.fromList(
+          Uint8List pictureData = Uint8List.fromList(
             data['content'].toString().codeUnits,
           );
           DateTime dt = DateTime.fromMillisecondsSinceEpoch(data['timestamp']);
           String timestamp = dt.toLocal().toIso8601String();
+          String size = (pictureData.lengthInBytes / 1024).ceil().toString();
 
           return Padding(
             padding: EdgeInsets.all(12),
@@ -41,16 +42,24 @@ class _HomePageState extends State<HomePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
-              leading: Image.memory(imageData),
-              title: Text(timestamp),
+              leading: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.08,
+                child: Center(
+                  child: Image.memory(
+                    pictureData,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              title: Text('$timestamp - $size kB'),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => PreviewPage(
-                      picture: XFile.fromData(imageData),
-                      timestamp: dt,
                       id: snapshot.key ?? '',
+                      picture: XFile.fromData(pictureData),
+                      timestamp: dt,
                     ),
                   ),
                 );
@@ -65,13 +74,13 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             iconSize: 30,
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            icon: const Icon(Icons.add_photo_alternate, color: Colors.white),
+            icon: const Icon(Icons.add_photo_alternate),
             onPressed: _uploadPicture,
           ),
           IconButton(
             iconSize: 30,
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            icon: const Icon(Icons.add_a_photo, color: Colors.white),
+            icon: const Icon(Icons.photo_camera),
             onPressed: _takePicture,
           ),
         ],
@@ -81,13 +90,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _uploadPicture() async {
     try {
-      final imagePicker = ImagePicker();
-      final selectedImage = await imagePicker.pickImage(
+      final selectedPicture = await ImagePicker().pickImage(
         source: ImageSource.gallery,
       );
-      if (selectedImage == null) return;
+      if (selectedPicture == null) return;
 
-      DateTime timestamp = await selectedImage.lastModified();
+      final timestamp = await selectedPicture.lastModified();
 
       if (!context.mounted) return;
       Navigator.push(
@@ -95,7 +103,7 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder: (context) => PreviewPage(
             id: '',
-            picture: selectedImage,
+            picture: selectedPicture,
             timestamp: timestamp,
           ),
         ),
