@@ -12,6 +12,8 @@ Kevin DOOLAEGHE
 * [Google Docs - Get Started with Realtime Database](https://firebase.google.com/docs/database/flutter/start)
 * [Google Codelab - Get to know Firebase for Flutter](https://firebase.google.com/codelabs/firebase-get-to-know-flutter#0)
 * [Medium - AI apps with machine learning in flutter](https://medium.com/@tendallas/ai-apps-with-machine-learning-in-flutter-7927fb2410b9)
+* [Medium - Flutter Web and Machine Learning](https://medium.com/codechai/flutter-web-and-machine-learning-64ab1f315001)
+* [Flutter - Conditional dependency imports](https://github.com/simolus3/drift/issues/658#issuecomment-648938968)
 
 ## Setup a Flutter project with Firebase
 

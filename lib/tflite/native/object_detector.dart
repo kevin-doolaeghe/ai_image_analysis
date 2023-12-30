@@ -20,14 +20,14 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
-class ObjectDetection {
+class ObjectDetector {
   static const String _modelPath = 'assets/tflite/mobilenet_v1.model.tflite';
   static const String _labelPath = 'assets/tflite/mobilenet_v1.labels.txt';
 
   Interpreter? _interpreter;
   List<String>? _labels;
 
-  ObjectDetection() {
+  ObjectDetector() {
     _loadModel();
     _loadLabels();
     log('Done.');
