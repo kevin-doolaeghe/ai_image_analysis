@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
-
 Never _unsupported() {
   throw UnsupportedError(
     'No suitable TensorFlow Lite implementation was found on this platform.',
@@ -12,11 +10,11 @@ Never _unsupported() {
 // be replaced with the methods in native.dart or web.dart
 
 class TFLite {
-  Future<String> classifyImage(XFile image) async {
+  Future<String> classifyImage(Uint8List imageBytes) async {
     _unsupported();
   }
 
-  Future<Uint8List> detectObjects(XFile image) async {
+  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
     _unsupported();
   }
 }

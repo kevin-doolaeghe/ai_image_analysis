@@ -15,7 +15,6 @@
  */
 import 'dart:developer';
 import 'dart:io';
-import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -54,14 +53,12 @@ class ObjectDetector {
     _labels = labelsRaw.split('\n');
   }
 
-  Future<Uint8List> detectObjects(XFile image) async {
+  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
     log('Processing image...');
-    // Reading image bytes from file
-    final imageData = await image.readAsBytes();
 
     // Resizing image for model, [300, 300]
     final imageInput = img.copyResize(
-      img.decodeImage(imageData)!,
+      img.decodeImage(imageBytes)!,
       width: 300,
       height: 300,
     );

@@ -3,18 +3,29 @@ library main;
 
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
+import 'package:ai_image_analysis/tflite/web/image_data.dart';
+import 'package:image/image.dart' as img;
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as jsutil;
 
 @JS('detectObjects')
-external Uint8List _detectObjects(Uint8List image);
+external Uint8List _detectObjects(ImageData image);
 
 class ObjectDetector {
-  Future<Uint8List> detectObjects(XFile image) async {
+  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
+    final image = img.decodeImage(imageBytes);
+    if (image == null) return Uint8List.fromList([]);
+
     Uint8List imageData = await jsutil.promiseToFuture<Uint8List>(
-      _detectObjects(await image.readAsBytes()),
+      _detectObjects(
+        ImageData(
+          data: image.toUint8List(),
+          width: image.width,
+          height: image.height,
+        ),
+      ),
     );
-    return imageData;
+
+    return image.toUint8List();
   }
 }

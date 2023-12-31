@@ -73,7 +73,7 @@ class _PreviewPageState extends State<PreviewPage> {
                         iconSize: 30,
                         padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
                         icon: const Icon(Icons.upload_file),
-                        onPressed: _analyzePicture,
+                        onPressed: _detectObjects,
                       ),
                       IconButton(
                         iconSize: 30,
@@ -122,23 +122,16 @@ class _PreviewPageState extends State<PreviewPage> {
     );
   }
 
-  Future<void> _analyzePicture() async {
-    final imageData = await TFLite().detectObjects(widget.picture);
-    /*
-    final res = await TFLite().classifyImage(widget.picture);
-    debugPrint(res);
-    */
+  Future<void> _detectObjects() async {
+    setState(() {
+      _isReady = false;
+    });
+    _pictureData = await TFLite().detectObjects(_pictureData);
 
-    if (!context.mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PreviewPage(
-          id: '',
-          picture: XFile.fromData(imageData),
-          timestamp: DateTime.now(),
-        ),
-      ),
-    );
+    debugPrint(await TFLite().classifyImage(_pictureData));
+
+    setState(() {
+      _isReady = true;
+    });
   }
 }

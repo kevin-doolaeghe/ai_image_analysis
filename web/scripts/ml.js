@@ -1,5 +1,6 @@
 function imageToTensor(data, width, height) {
-    const buffer = new Uint8Array(width * height * 3)
+    // Drop the alpha channel info for mobilenet
+    const buffer = new Uint8Array(width * height * 3);
     let offset = 0;
     for (let i = 0; i < buffer.length; i += 3) {
         buffer[i] = data[offset];
@@ -7,20 +8,19 @@ function imageToTensor(data, width, height) {
         buffer[i + 2] = data[offset + 2];
         offset += 4;
     }
-
     return tf.tensor3d(buffer, [height, width, 3]);
 }
 
-async function classifyImage(data, width, height) {
+async function classifyImage(image) {
     let result = [];
+    console.log(image);
+    let tensorImage = imageToTensor(image.data, image.width, image.height);
     try {
-        let tensor = imageToTensor(data, width, height);
-
         // Load the MobileNet model
         const model = await mobilenet.load();
 
         // Classify the image
-        let predictions = await model.classify(tensor);
+        let predictions = await model.classify(tensorImage);
 
         // Extract the result
         predictions.forEach((item, _) => result.push(item));
@@ -34,5 +34,5 @@ async function classifyImage(data, width, height) {
 
 async function detectObjects(image) {
     // TODO: add detectObjects method
-    return image;
+    return image.data;
 }

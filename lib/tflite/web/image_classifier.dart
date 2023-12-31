@@ -1,26 +1,30 @@
 @JS()
 library main;
 
-import 'package:camera/camera.dart';
+import 'package:ai_image_analysis/tflite/web/image_data.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as jsutil;
 
 @JS('classifyImage')
-external String _classifyImage(Uint8List data, int width, int height);
+external String _classifyImage(ImageData image);
 
 class ImageClassifier {
-  Future<String> classifyImage(XFile image) async {
-    final imageData = await image.readAsBytes();
-    final decodedImage = img.decodeImage(imageData);
+  Future<String> classifyImage(Uint8List imageBytes) async {
+    final image = img.decodeImage(imageBytes);
+    if (image == null) return '';
+
     String category = await jsutil.promiseToFuture<String>(
       _classifyImage(
-        decodedImage!.toUint8List(),
-        decodedImage.width,
-        decodedImage.height,
+        ImageData(
+          data: image.toUint8List(),
+          width: image.width,
+          height: image.height,
+        ),
       ),
     );
+
     return category;
   }
 }

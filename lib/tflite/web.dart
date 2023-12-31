@@ -2,15 +2,13 @@ import 'dart:typed_data';
 
 import 'package:ai_image_analysis/tflite/web/image_classifier.dart';
 import 'package:ai_image_analysis/tflite/web/object_detector.dart';
-import 'package:camera/camera.dart';
 
 class TFLite {
-  Future<String> classifyImage(XFile image) async {
-    return await ImageClassifier().classifyImage(image);
+  Future<String> classifyImage(Uint8List imageBytes) async {
+    return await ImageClassifier().classifyImage(imageBytes);
   }
 
-  Future<Uint8List> detectObjects(XFile image) async {
-    // return await image.readAsBytes();
-    return await ObjectDetector().detectObjects(image);
+  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
+    return await ObjectDetector().detectObjects(imageBytes);
   }
 }

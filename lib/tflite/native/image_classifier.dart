@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -34,8 +33,8 @@ class ImageClassifier {
     _labels = labelsRaw.split('\n');
   }
 
-  Future<String> classifyImage(XFile image) async {
-    final input = await image.readAsBytes();
+  Future<String> classifyImage(Uint8List imageBytes) async {
+    final input = imageBytes;
     final output = List.filled(1000, 0);
 
     _interpreter?.run(input, output);
