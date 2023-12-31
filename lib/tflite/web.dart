@@ -10,7 +10,7 @@ class TFLite {
   }
 
   Future<Uint8List> detectObjects(XFile image) async {
-    return await image.readAsBytes();
-    // return await ObjectDetector().detectObjects(image);
+    // return await image.readAsBytes();
+    return await ObjectDetector().detectObjects(image);
   }
 }

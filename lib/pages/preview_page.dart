@@ -124,8 +124,10 @@ class _PreviewPageState extends State<PreviewPage> {
 
   Future<void> _analyzePicture() async {
     final imageData = await TFLite().detectObjects(widget.picture);
+    /*
     final res = await TFLite().classifyImage(widget.picture);
     debugPrint(res);
+    */
 
     if (!context.mounted) return;
     Navigator.push(

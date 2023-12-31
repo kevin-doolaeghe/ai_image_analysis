@@ -34,7 +34,5 @@ async function classifyImage(data, width, height) {
 
 async function detectObjects(image) {
     // TODO: add detectObjects method
-
-    let result = [];
-    return result;
+    return image;
 }
