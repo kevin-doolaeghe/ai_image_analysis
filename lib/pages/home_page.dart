@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ai_image_analysis/pages/camera_page.dart';

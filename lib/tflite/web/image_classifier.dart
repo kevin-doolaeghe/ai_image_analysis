@@ -12,8 +12,10 @@ external String _classifyImage(ImageData image);
 
 class ImageClassifier {
   Future<String> classifyImage(Uint8List imageBytes) async {
-    final image = img.decodeImage(imageBytes);
+    var image = img.decodeImage(imageBytes);
     if (image == null) return '';
+
+    // image = img.copyResize(image, width: 300, height: 300);
 
     String category = await jsutil.promiseToFuture<String>(
       _classifyImage(

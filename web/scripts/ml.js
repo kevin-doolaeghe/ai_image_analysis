@@ -13,9 +13,11 @@ function imageToTensor(data, width, height) {
 
 async function classifyImage(image) {
     let result = [];
-    console.log(image);
-    let tensorImage = imageToTensor(image.data, image.width, image.height);
+
     try {
+        // Convert the image
+        let tensorImage = tf.tensor3d(image.data, [image.height, image.width, 3]);
+
         // Load the MobileNet model
         const model = await mobilenet.load();
 
@@ -23,16 +25,19 @@ async function classifyImage(image) {
         let predictions = await model.classify(tensorImage);
 
         // Extract the result
-        predictions.forEach((item, _) => result.push(item));
+        predictions.forEach((item, _) => result.push(`${item.className} (${item.probability * 100} %)`));
     } catch (error) {
         console.log('Error: ' + error);
     }
 
+    result = result.join(' - ');
     console.log(result);
+
     return result.toString();
 }
 
 async function detectObjects(image) {
     // TODO: add detectObjects method
+
     return image.data;
 }

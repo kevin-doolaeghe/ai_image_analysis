@@ -13,19 +13,21 @@ external Uint8List _detectObjects(ImageData image);
 
 class ObjectDetector {
   Future<Uint8List> detectObjects(Uint8List imageBytes) async {
-    final image = img.decodeImage(imageBytes);
-    if (image == null) return Uint8List.fromList([]);
+    var image = img.decodeImage(imageBytes);
+    if (image == null) return imageBytes;
+
+    // image = img.copyResize(image, width: 300, height: 300);
 
     Uint8List imageData = await jsutil.promiseToFuture<Uint8List>(
       _detectObjects(
         ImageData(
-          data: image.toUint8List(),
+          data: img.encodeJpg(image),
           width: image.width,
           height: image.height,
         ),
       ),
     );
 
-    return image.toUint8List();
+    return imageData;
   }
 }
