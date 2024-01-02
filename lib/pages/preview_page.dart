@@ -128,7 +128,7 @@ class _PreviewPageState extends State<PreviewPage> {
     });
     _pictureData = await TFLite().detectObjects(_pictureData);
 
-    await TFLite().classifyImage(_pictureData);
+    // await TFLite().classifyImage(_pictureData);
 
     setState(() {
       _isReady = true;

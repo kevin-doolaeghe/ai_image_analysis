@@ -21,13 +21,13 @@ class ObjectDetector {
     Uint8List imageData = await jsutil.promiseToFuture<Uint8List>(
       _detectObjects(
         ImageData(
-          data: img.encodeJpg(image),
+          data: image.toUint8List(), // img.encodeJpg(image),
           width: image.width,
           height: image.height,
         ),
       ),
     );
 
-    return imageData;
+    return imageBytes; // imageData;
   }
 }

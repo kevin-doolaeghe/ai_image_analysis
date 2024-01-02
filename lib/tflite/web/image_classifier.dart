@@ -15,7 +15,14 @@ class ImageClassifier {
     var image = img.decodeImage(imageBytes);
     if (image == null) return '';
 
-    // image = img.copyResize(image, width: 300, height: 300);
+    /*
+    const width = 200;
+    image = img.copyResize(
+      image,
+      width: width,
+      height: (image.height * width) ~/ image.width,
+    );
+    */
 
     String category = await jsutil.promiseToFuture<String>(
       _classifyImage(

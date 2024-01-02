@@ -19,10 +19,13 @@ async function classifyImage(image) {
         let tensorImage = tf.tensor3d(image.data, [image.height, image.width, 3]);
 
         // Load the MobileNet model
-        const model = await mobilenet.load();
+        const version = 2;
+        const alpha = 0.5;
+        const model = await mobilenet.load({ version, alpha });
 
         // Classify the image
         let predictions = await model.classify(tensorImage);
+        console.log(predictions);
 
         // Extract the result
         predictions.forEach((item, _) => result.push(`${item.className} (${item.probability * 100} %)`));
@@ -31,13 +34,29 @@ async function classifyImage(image) {
     }
 
     result = result.join(' - ');
-    console.log(result);
-
     return result.toString();
 }
 
 async function detectObjects(image) {
-    // TODO: add detectObjects method
+    let result = [];
 
+    try {
+        // Convert the image
+        let tensorImage = tf.tensor3d(image.data, [image.height, image.width, 3]);
+
+        // Load the COCO-SSD model
+        const model = await cocoSsd.load();
+
+        // Detect the object on image
+        let predictions = await model.detect(image);
+        console.log(predictions);
+
+        // Extract the result
+        predictions.forEach((item, _) => result.push(item.class));
+    } catch (error) {
+        console.log('Error: ' + error);
+    }
+
+    result = result.join(' - ');
     return image.data;
 }

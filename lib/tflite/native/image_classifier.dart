@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class ImageClassifier {
-  static const String _modelPath = 'assets/tflite/mobilenet_v1.model.tflite';
-  static const String _labelPath = 'assets/tflite/mobilenet_v1.labels.txt';
+  static const String _modelPath = 'assets/tflite/coco-ssd.model.tflite';
+  static const String _labelPath = 'assets/tflite/coco-ssd.labels.txt';
 
   Interpreter? _interpreter;
   List<String>? _labels;
