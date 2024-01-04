@@ -15,6 +15,7 @@ Kevin DOOLAEGHE
 * [Medium - Flutter Web and Machine Learning](https://medium.com/codechai/flutter-web-and-machine-learning-64ab1f315001)
 * [Utilizing JS Library for Flutter Web](https://blog.stackademic.com/utilizing-js-library-for-flutter-web-c683c590927f)
 * [Flutter - Conditional dependency imports](https://github.com/simolus3/drift/issues/658#issuecomment-648938968)
+* [TensorFlow - TFJS Samples](https://www.tensorflow.org/js/models?hl=fr)
 
 ## Setup a Flutter project with Firebase
 
