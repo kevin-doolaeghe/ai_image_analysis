@@ -28,7 +28,7 @@ class ObjectDetector {
 
     for (int i = 0; i < predictions.length; i++) {
       var prediction = predictions[i] as ObjectDetectorPrediction;
-      if (prediction.probability > 0.6) {
+      if (prediction.probability > 0.50) {
         // Rectangle drawing
         img.drawRect(
           image,
@@ -39,14 +39,14 @@ class ObjectDetector {
           color: img.ColorRgb8(255, 0, 0),
           thickness: 3,
         );
-
         // Label drawing
+        String probStr = (prediction.probability * 100).toStringAsPrecision(3);
         img.drawString(
           image,
-          '${prediction.item} ${prediction.probability}',
+          '${prediction.item} $probStr%',
           font: img.arial14,
-          x: prediction.coords[0].round() + 1,
-          y: prediction.coords[1].round() + 1,
+          x: prediction.coords[0].round() + 4,
+          y: prediction.coords[1].round() + 3,
           color: img.ColorRgb8(255, 0, 0),
         );
       }

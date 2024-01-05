@@ -32,13 +32,11 @@ class ImageClassifier {
       ),
     );
 
-    String result = '';
-    for (int i = 0; i < predictions.length; i++) {
-      var prediction = predictions[i] as ImageClassifierPrediction;
-      String probStr = (prediction.probability * 100).toStringAsPrecision(2);
-      result += '${prediction.item} ($probStr%)';
+    if (predictions.isNotEmpty) {
+      var prediction = predictions[0] as ImageClassifierPrediction;
+      String probStr = (prediction.probability * 100).toStringAsPrecision(3);
+      return '${prediction.item} ($probStr%)';
     }
-
-    return result;
+    return '';
   }
 }
