@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ai_image_analysis/pages/home_page.dart';
@@ -23,12 +24,14 @@ class PreviewPage extends StatefulWidget {
 }
 
 class _PreviewPageState extends State<PreviewPage> {
+  late TFLite _tf;
   late Uint8List _pictureData;
   bool _isReady = false;
 
   @override
   void initState() {
     super.initState();
+    _tf = TFLite();
     _initImageData();
   }
 
@@ -72,7 +75,7 @@ class _PreviewPageState extends State<PreviewPage> {
                       IconButton(
                         iconSize: 30,
                         padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                        icon: const Icon(Icons.upload_file),
+                        icon: const Icon(Icons.analytics),
                         onPressed: _detectObjects,
                       ),
                       IconButton(
@@ -126,9 +129,25 @@ class _PreviewPageState extends State<PreviewPage> {
     setState(() {
       _isReady = false;
     });
-    _pictureData = await TFLite().detectObjects(_pictureData);
 
-    // await TFLite().classifyImage(_pictureData);
+    // _pictureData = await TFLite().detectObjects(_pictureData);
+
+    final ReceivePort receivePort = ReceivePort();
+    await Isolate.spawn(
+      (List<dynamic> args) async {
+        SendPort sendPort = args[0];
+        TFLite tf = args[1];
+        Uint8List pictureData = args[2];
+
+        await Future.delayed(const Duration(seconds: 2));
+        final newPictureData = pictureData;
+        await tf.detectObjects(pictureData);
+
+        Isolate.exit(sendPort, newPictureData);
+      },
+      [receivePort.sendPort, _tf, _pictureData],
+    );
+    _pictureData = await (receivePort.first) as Uint8List;
 
     setState(() {
       _isReady = true;

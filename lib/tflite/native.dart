@@ -4,11 +4,19 @@ import 'package:ai_image_analysis/tflite/native/image_classifier.dart';
 import 'package:ai_image_analysis/tflite/native/object_detector.dart';
 
 class TFLite {
-  Future<String> classifyImage(Uint8List imageBytes) async {
-    return await ImageClassifier().classifyImage(imageBytes);
+  late ObjectDetector _objectDetector;
+  late ImageClassifier _imageClassifier;
+
+  TFLite() {
+    _objectDetector = ObjectDetector();
+    _imageClassifier = ImageClassifier();
   }
 
-  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
-    return await ObjectDetector().detectObjects(imageBytes);
+  String classifyImage(Uint8List imageBytes) {
+    return _imageClassifier.classifyImage(imageBytes);
+  }
+
+  void detectObjects(Uint8List imageBytes) {
+    _objectDetector.detectObjects(imageBytes);
   }
 }

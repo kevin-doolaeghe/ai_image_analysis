@@ -1,66 +1,188 @@
-/*
- * Copyright 2023 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
+import 'dart:isolate';
+
+import 'package:ai_image_analysis/tflite/native/helpers.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
-class ObjectDetector {
+enum _Codes {
+  init,
+  busy,
+  ready,
+  detect,
+  result,
+}
+
+class _Command {
+  const _Command(this.code, {this.args});
+
+  final _Codes code;
+  final List<Object>? args;
+}
+
+class ScreenParams {
+  static late Size screenSize;
+  static late Size previewSize;
+
+  static double previewRatio = (previewSize.height > previewSize.width
+          ? previewSize.height
+          : previewSize.width) /
+      (previewSize.height < previewSize.width
+          ? previewSize.height
+          : previewSize.width);
+
+  static Size screenPreviewSize = Size(
+    screenSize.width,
+    screenSize.width * previewRatio,
+  );
+}
+
+const int _modelInputSize = 300;
+
+class Recognition {
+  final int _id;
+  final String _label;
+  final double _score;
+  final Rect _location;
+
+  Recognition(this._id, this._label, this._score, this._location);
+
+  int get id => _id;
+  String get label => _label;
+  double get score => _score;
+  Rect get location => _location;
+
+  Rect get renderLocation {
+    final double scaleX =
+        ScreenParams.screenPreviewSize.width / _modelInputSize;
+    final double scaleY =
+        ScreenParams.screenPreviewSize.height / _modelInputSize;
+    return Rect.fromLTWH(
+      location.left * scaleX,
+      location.top * scaleY,
+      location.width * scaleX,
+      location.height * scaleY,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Recognition(id: $id, label: $label, score: $score, location: $location)';
+  }
+}
+
+class ObjectDetector extends Model {
   static const String _modelPath = 'assets/tflite/mobilenet_v1.model.tflite';
-  static const String _labelPath = 'assets/tflite/mobilenet_v1.labels.txt';
+  static const String _labelsPath = 'assets/tflite/mobilenet_v1.labels.txt';
+
+  late final Isolate _isolate;
+  late final SendPort _sendPort;
+
+  bool _isReady = false;
+
+  final resultList = StreamController<Map<String, dynamic>>();
+
+  ObjectDetector() : super(_modelPath, _labelsPath) {
+    log('ObjectDetector class has been initialized.');
+  }
+
+  Future<void> start() async {
+    final ReceivePort receivePort = ReceivePort();
+    _isolate = await Isolate.spawn(
+      _ObjectDetectorService._run,
+      receivePort.sendPort,
+    );
+    receivePort.listen((msg) => _handleCommand(msg as _Command));
+  }
+
+  Future<void> stop() async {
+    _isolate.kill();
+  }
+
+  void detectObjects(Uint8List imageBytes) {
+    if (_isReady) {
+      _sendPort.send(_Command(_Codes.detect, args: [imageBytes]));
+    }
+  }
+
+  void _handleCommand(_Command command) {
+    switch (command.code) {
+      case _Codes.init:
+        _sendPort = command.args?[0] as SendPort;
+        RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
+        _sendPort.send(_Command(
+          _Codes.init,
+          args: [
+            rootIsolateToken,
+            interpreter!.address,
+            labels!,
+          ],
+        ));
+      case _Codes.ready:
+        _isReady = true;
+      case _Codes.busy:
+        _isReady = false;
+      case _Codes.result:
+        _isReady = true;
+        resultList.add(command.args?[0] as Map<String, dynamic>);
+      default:
+        log('ObjectDetector unrecognized command: ${command.code}');
+    }
+  }
+}
+
+class _ObjectDetectorService {
+  static const double _minConfidence = 0.5;
 
   Interpreter? _interpreter;
   List<String>? _labels;
 
-  ObjectDetector() {
-    _loadModel();
-    _loadLabels();
-    log('Done.');
+  final SendPort _sendPort;
+
+  _ObjectDetectorService(this._sendPort);
+
+  static void _run(SendPort sendPort) {
+    ReceivePort receivePort = ReceivePort();
+    final _ObjectDetectorService isolate = _ObjectDetectorService(sendPort);
+
+    receivePort.listen((msg) => isolate._handleCommand(msg as _Command));
+
+    sendPort.send(_Command(_Codes.init, args: [receivePort.sendPort]));
   }
 
-  Future<void> _loadModel() async {
-    log('Loading interpreter options...');
-    final interpreterOptions = InterpreterOptions();
-    // Use XNNPACK Delegate
-    if (Platform.isAndroid) interpreterOptions.addDelegate(XNNPackDelegate());
-    // Use Metal Delegate
-    if (Platform.isIOS) interpreterOptions.addDelegate(GpuDelegate());
+  void _handleCommand(_Command command) {
+    switch (command.code) {
+      case _Codes.init:
+        final rootIsolateToken = command.args?[0] as RootIsolateToken;
+        BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
 
-    log('Loading interpreter...');
-    _interpreter = await Interpreter.fromAsset(
-      _modelPath,
-      options: interpreterOptions,
-    );
+        _interpreter = Interpreter.fromAddress(command.args?[1] as int);
+        _labels = command.args?[2] as List<String>;
+
+        _sendPort.send(const _Command(_Codes.ready));
+      case _Codes.detect:
+        _sendPort.send(const _Command(_Codes.busy));
+
+        _detectObjects(command.args?[0] as Uint8List);
+      default:
+        log('_ObjectDetectorService unrecognized command: ${command.code}');
+    }
   }
 
-  Future<void> _loadLabels() async {
-    log('Loading labels...');
-    final labelsRaw = await rootBundle.loadString(_labelPath);
-    _labels = labelsRaw.split('\n');
-  }
+  Map<String, dynamic> _detectObjects(Uint8List imageBytes) {
+    log('Converting image...');
+    var imageConversionStartTime = DateTime.now().millisecondsSinceEpoch;
 
-  Future<Uint8List> detectObjects(Uint8List imageBytes) async {
-    log('Processing image...');
+    // Decoding image
+    final decodedImage = img.decodeImage(imageBytes);
 
     // Resizing image for model, [300, 300]
     final imageInput = img.copyResize(
-      img.decodeImage(imageBytes)!,
-      width: 300,
-      height: 300,
+      decodedImage!,
+      width: _modelInputSize,
+      height: _modelInputSize,
     );
 
     // Creating matrix representation, [300, 300, 3]
@@ -75,15 +197,22 @@ class ObjectDetector {
       ),
     );
 
+    var imageConversionElapsedTime =
+        DateTime.now().millisecondsSinceEpoch - imageConversionStartTime;
+
+    log('Processing image...');
+    var inferenceStartTime = DateTime.now().millisecondsSinceEpoch;
+
     final output = _runInference(imageMatrix);
 
     log('Processing outputs...');
     // Location
-    final locationsRaw = output.first as List<List<num>>;
-    final locations = locationsRaw.map((list) {
-      return list.map((value) => (value * 300).toInt()).toList();
-    }).toList();
-    // log('Locations: $locations');
+    final locationsRaw = output.first as List<List<double>>;
+    final locations = locationsRaw
+        .map((list) => list.map((value) => (value * _modelInputSize)).toList())
+        .map((rect) => Rect.fromLTRB(rect[1], rect[0], rect[3], rect[2]))
+        .toList();
+    log('Locations: $locations');
 
     // Classes
     final classesRaw = output.elementAt(1).first as List<num>;
@@ -91,7 +220,7 @@ class ObjectDetector {
     log('Classes: $classes');
 
     // Scores
-    final scores = output.elementAt(2).first as List<num>;
+    final scores = output.elementAt(2).first as List<double>;
     log('Scores: $scores');
 
     // Number of detections
@@ -106,34 +235,32 @@ class ObjectDetector {
     }
     log('Detected objects: $classications');
 
-    log('Outlining objects...');
+    log('Generating recognitions...');
+    final List<Recognition> recognitions = [];
     for (var i = 0; i < numberOfDetections; i++) {
-      if (scores[i] > 0.6) {
-        // Rectangle drawing
-        img.drawRect(
-          imageInput,
-          x1: locations[i][1],
-          y1: locations[i][0],
-          x2: locations[i][3],
-          y2: locations[i][2],
-          color: img.ColorRgb8(255, 0, 0),
-          thickness: 3,
-        );
-
-        // Label drawing
-        img.drawString(
-          imageInput,
-          '${classications[i]} ${scores[i]}',
-          font: img.arial14,
-          x: locations[i][1] + 1,
-          y: locations[i][0] + 1,
-          color: img.ColorRgb8(255, 0, 0),
+      if (scores[i] > _minConfidence) {
+        recognitions.add(
+          Recognition(i, classications[i], scores[i], locations[i]),
         );
       }
     }
 
+    var inferenceElapsedTime =
+        DateTime.now().millisecondsSinceEpoch - inferenceStartTime;
+
     log('Done.');
-    return img.encodeJpg(imageInput);
+    var totalElapsedTime =
+        DateTime.now().millisecondsSinceEpoch - imageConversionStartTime;
+
+    return {
+      "recognitions": recognitions,
+      "stats": <String, String>{
+        'Conversion time:': imageConversionElapsedTime.toString(),
+        'Inference time:': inferenceElapsedTime.toString(),
+        'Total prediction time:': totalElapsedTime.toString(),
+        'Frame': '${decodedImage.width} X ${decodedImage.height}',
+      },
+    };
   }
 
   List<List<Object>> _runInference(List<List<List<num>>> imageMatrix) {
